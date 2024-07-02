@@ -1,15 +1,22 @@
 ARG GRAFANA_VERSION="latest"
 
+
 FROM grafana/grafana:${GRAFANA_VERSION}
+
 
 ARG GF_INSTALL_IMAGE_RENDERER_PLUGIN="false"
 
+
 ARG GF_GID="0"
+
 
 ENV GF_PATHS_PLUGINS="/var/lib/grafana-plugins"
 ENV GF_PLUGIN_RENDERING_CHROME_BIN="/usr/bin/chrome"
+COPY grafana.com.pem /etc/ssl/certs/
+
 
 USER root
+
 
 RUN mkdir -p "$GF_PATHS_PLUGINS" && \
     chown -R grafana:${GF_GID} "$GF_PATHS_PLUGINS" && \
@@ -28,8 +35,11 @@ RUN mkdir -p "$GF_PATHS_PLUGINS" && \
         ln -s /usr/bin/google-chrome "$GF_PLUGIN_RENDERING_CHROME_BIN"; \
       fi \
     fi
+RUN  update-ca-certificates
+
 
 USER grafana
+
 
 RUN if [ $GF_INSTALL_IMAGE_RENDERER_PLUGIN = "true" ]; then \
       if grep -i -q alpine /etc/issue; then \
@@ -45,7 +55,9 @@ RUN if [ $GF_INSTALL_IMAGE_RENDERER_PLUGIN = "true" ]; then \
       fi \
     fi
 
+
 ARG GF_INSTALL_PLUGINS=""
+
 
 RUN if [ ! -z "${GF_INSTALL_PLUGINS}" ]; then \
       OLDIFS=$IFS; \
